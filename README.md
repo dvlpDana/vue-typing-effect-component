@@ -20,7 +20,7 @@ npm install vue-typing-effect-component
 
 ## Usage
 
-프로젝트에서 컴포넌트를 임포트하여 사용합니다.
+프로젝트에서 컴포넌트를 import하여 사용합니다.
 
 #### 기본 사용법
 ```vue
@@ -126,7 +126,7 @@ export default defineComponent({
 
 ## Contributing
 
-이 프로젝트에 기여하고 싶다면, GitHub 저장소에서 이슈나 풀 리퀘스트를 제출해주세요.
+이 프로젝트에 기여하고 싶다면, GitHub 저장소에서 issue나 pull request를 제출해주세요.
 
 ## License
 
