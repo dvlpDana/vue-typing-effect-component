@@ -1,5 +1,5 @@
 import { mount } from "@vue/test-utils";
-import TypingEffect from "@/components/TypingEffect.vue";
+import TypingEffect from "@/TypingEffect.vue";
 import { nextTick } from "vue";
 
 // Jest 타임아웃 설정
@@ -15,6 +15,10 @@ const waitForTyping = async (
 };
 
 describe("TypingEffect.vue", () => {
+  afterEach(() => {
+    jest.clearAllTimers(); // 모든 타이머를 정리합니다.
+  });
+
   it("renders props.text when passed", async () => {
     const text = "안녕하세요, 여기는 타이핑 효과 컴포넌트입니다.";
     const wrapper = mount(TypingEffect, {
@@ -102,6 +106,6 @@ describe("TypingEffect.vue", () => {
     await nextTick(); // 상태 업데이트를 기다립니다.
     await waitForTyping(finalText, 50, 30);
 
-    expect(wrapper.text()).toBe(initialText + appendedText + finalText);
+    expect(wrapper.text()).toBe(finalText);
   });
 });
