@@ -1,3 +1,4 @@
+import { nextTick } from "vue";
 import { mount } from "@vue/test-utils";
 import TypingEffect from "@/TypingEffect.vue";
 
@@ -82,6 +83,8 @@ describe("TypingEffect.vue", () => {
     });
 
     await waitForTyping(text, 50, 30);
+
+    await nextTick();
 
     const cursorElement = wrapper.find(".cursor");
     expect(cursorElement.exists()).toBe(false);
