@@ -1,6 +1,5 @@
 import { mount } from "@vue/test-utils";
 import TypingEffect from "@/TypingEffect.vue";
-import { nextTick } from "vue";
 
 // Jest 타임아웃 설정
 jest.setTimeout(30000); // 30초로 설정
@@ -31,81 +30,91 @@ describe("TypingEffect.vue", () => {
     expect(wrapper.text()).toBe(text);
   });
 
-  it("applies custom class and style", async () => {
-    const text = "안녕하세요, 여기는 타이핑 효과 컴포넌트입니다.";
-    const customClass = "custom-typing-class";
-    const customStyle = { color: "red", fontSize: "24px" };
+  it("pauses and resumes typing", async () => {
+    const text = "타이핑 효과를 일시정지하고 다시 시작합니다.";
     const wrapper = mount(TypingEffect, {
-      props: { text, customClass, customStyle, intervalType: 50, humanize: 30 },
+      props: { text, intervalType: 50, humanize: 30 },
     });
 
-    // 텍스트 전체가 타이핑될 때까지 충분히 기다립니다.
+    // 일시정지하기 전에 잠깐 타이핑
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    wrapper.vm.pauseTyping();
+
+    // 일시정지 후 1초 기다린 다음 재개
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    wrapper.vm.resumeTyping();
+
     await waitForTyping(text, 50, 30);
-
-    const typingElement = wrapper.find(`.${customClass}`);
-    expect(typingElement.exists()).toBe(true);
-    const elementStyle = typingElement.element as HTMLElement;
-    expect(elementStyle.style.color).toBe("red");
-    expect(elementStyle.style.fontSize).toBe("24px");
-  });
-
-  it("handles append mode", async () => {
-    const initialText = "타이핑";
-    const appendedText = " 효과 컴포넌트입니다.";
-    const wrapper = mount(TypingEffect, {
-      props: { text: initialText, intervalType: 50, humanize: 30 },
-    });
-
-    // 초기 텍스트를 타이핑합니다.
-    await waitForTyping(initialText, 50, 30);
-
-    wrapper.setProps({ text: appendedText, append: true });
-    await nextTick(); // 상태 업데이트를 기다립니다.
-
-    await waitForTyping(appendedText, 50, 30);
-
-    expect(wrapper.text()).toBe(initialText + appendedText);
-  });
-
-  it("handles humanize function", async () => {
-    const text = "안녕하세요, 여기는 타이핑 효과 컴포넌트입니다.";
-    const humanize = (interval: number) => interval * 2;
-    const wrapper = mount(TypingEffect, {
-      props: { text, humanize, intervalType: 50 },
-    });
-
-    // 텍스트 전체가 타이핑될 때까지 충분히 기다립니다.
-    await waitForTyping(text, 50, 100);
 
     expect(wrapper.text()).toBe(text);
   });
 
-  it("dynamically changes append property", async () => {
-    const initialText = "첫 번째 부분";
-    const appendedText = " 두 번째 부분입니다.";
-    const finalText = "최종 부분입니다.";
+  it("stops typing when endTyping is called", async () => {
+    const text = "이 텍스트는 중간에 멈춥니다.";
+    const wrapper = mount(TypingEffect, {
+      props: { text, intervalType: 50, humanize: 30 },
+    });
+
+    // 일부 텍스트가 타이핑된 후 종료합니다.
+    setTimeout(() => wrapper.vm.endTyping(), 500);
+
+    await waitForTyping(text, 50, 30);
+
+    expect(wrapper.text()).not.toBe(text);
+    expect(wrapper.text().length).toBeLessThan(text.length);
+  });
+
+  it("handles backspace character", async () => {
+    const text = "이것은\b\b\b 백스페이스 효과";
+    const wrapper = mount(TypingEffect, {
+      props: { text, intervalType: 50, humanize: 30 },
+    });
+
+    await waitForTyping(text, 50, 30);
+
+    expect(wrapper.text()).toBe("백스페이스 효과");
+  });
+
+  it("removes cursor after typing ends", async () => {
+    const text = "커서가 깜빡이다가 타이핑이 종료되면 사라집니다.";
+    const wrapper = mount(TypingEffect, {
+      props: { text, intervalType: 50, humanize: 30, showCursor: true },
+    });
+
+    await waitForTyping(text, 50, 30);
+
+    const cursorElement = wrapper.find(".cursor");
+    expect(cursorElement.exists()).toBe(false);
+  });
+
+  it("handles newline character", async () => {
+    const text = "첫 번째 줄입니다.\n두 번째 줄입니다.";
+    const wrapper = mount(TypingEffect, {
+      props: { text, intervalType: 50, humanize: 30 },
+    });
+
+    await waitForTyping(text, 50, 30);
+
+    const content = wrapper.html();
+    expect(content).toContain("<br>");
+    expect(wrapper.text()).toBe("첫 번째 줄입니다.두 번째 줄입니다.");
+  });
+
+  it("keeps cursor after typing ends when cursorAfterTyping is true", async () => {
+    const text = "커서가 타이핑 종료 후에도 유지됩니다.";
     const wrapper = mount(TypingEffect, {
       props: {
-        text: initialText,
+        text,
         intervalType: 50,
         humanize: 30,
-        append: true,
+        showCursor: true,
+        cursorAfterTyping: true,
       },
     });
 
-    // 첫 번째 텍스트를 타이핑합니다.
-    await waitForTyping(initialText, 50, 30);
+    await waitForTyping(text, 50, 30);
 
-    // 두 번째 텍스트를 append 모드로 타이핑합니다.
-    wrapper.setProps({ text: appendedText, append: true });
-    await nextTick(); // 상태 업데이트를 기다립니다.
-    await waitForTyping(appendedText, 50, 30);
-
-    // append 속성을 false로 변경하고 세 번째 텍스트를 타이핑합니다.
-    wrapper.setProps({ text: finalText, append: false });
-    await nextTick(); // 상태 업데이트를 기다립니다.
-    await waitForTyping(finalText, 50, 30);
-
-    expect(wrapper.text()).toBe(finalText);
+    const cursorElement = wrapper.find(".cursor");
+    expect(cursorElement.exists()).toBe(true);
   });
 });

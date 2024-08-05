@@ -1,2 +1,2 @@
-import TypingEffect from "./TypingEffect.vue";
+import TypingEffect from "@/TypingEffect.vue";
 export default TypingEffect;
