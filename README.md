@@ -3,7 +3,7 @@
 ![Codecov](https://codecov.io/gh/dvlpDana/vue-typing-effect-component/branch/main/graph/badge.svg)
 
 
-https://github.com/user-attachments/assets/000403b0-fd2a-4657-a6f5-517ee4dfe37d
+https://github.com/user-attachments/assets/b3c98fdc-51f8-4748-bdf6-93a1c6c764d3
 
 
 한글 자음 모음 결합에 타이핑 효과를 제공하는 Vue.js 컴포넌트로, 커스터마이징 가능한 타이핑 속도, 사람처럼 보이는 타이핑 간격, 텍스트 추가, 애니메이션 반복, 사용자 정의 스타일 및 클래스를 지원합니다.
