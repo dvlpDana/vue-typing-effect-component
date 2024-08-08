@@ -10,6 +10,7 @@
       <SelectorExample />
       <PauseResumeExample />
       <EndTypingExample />
+      <TypingComputedTimeExample />
     </div>
   </div>
 </template>
@@ -24,6 +25,7 @@ import PauseResumeExample from "./components/PauseResumeExample.vue";
 import EndTypingExample from "./components/EndTypingExample.vue";
 import CusorExample from "./components/CursorExample.vue";
 import SelectorExample from "./components/SelectorExample.vue";
+import TypingComputedTimeExample from "./components/TypingComputedTimeExample.vue";
 
 export default defineComponent({
   components: {
@@ -35,6 +37,7 @@ export default defineComponent({
     EndTypingExample,
     CusorExample,
     SelectorExample,
+    TypingComputedTimeExample,
   },
 });
 </script>

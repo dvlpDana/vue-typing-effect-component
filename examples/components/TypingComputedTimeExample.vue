@@ -30,7 +30,6 @@ const handleTypingStart = () => {
 };
 
 const handleTypingEnd = () => {
-  console.log("타이핑 종료됨"); // 디버깅을 위한 로그 출력
   if (startTime === 0) {
     console.error("타이핑이 시작되지 않았습니다.");
     return;
