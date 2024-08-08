@@ -1,4 +1,2 @@
-import { createApp } from "vue";
-import App from "./App.vue";
-
-createApp(App).mount("#app");
+import TypingEffect from "@/TypingEffect.vue";
+export default TypingEffect;

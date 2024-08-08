@@ -1,18 +1,37 @@
 {
   "name": "typing-effect-component",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0.0",
+  "author": "ShimDahnBee",
+  "description": "A Vue.js component that provides a typing effect for text.",
+  "main": "dist/typing-effect-component.common.js",
+  "module": "dist/typing-effect-component.umd.js",
+  "files": [
+    "dist"
+  ],
+  "bugs": {
+    "url": "https://github.com/dvlpDana/vue-typing-effect-component/issues"
+  },
+  "homepage": "https://github.com/dvlpDana/vue-typing-effect-component#readme",
+  "keywords": [
+    "vue",
+    "typing-effect",
+    "korean",
+    "한글",
+    "타이핑"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dvlpDana/vue-typing-effect-component.git"
+  },
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "serve:examples": "vue-cli-service serve --entry examples/main.ts",
+    "build": "vue-cli-service build --target lib src/main.ts",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "core-js": "^3.8.3",
-    "hangul-js": "^0.2.6",
-    "vue": "^3.2.13",
-    "vue-class-component": "^8.0.0-0"
+    "vue": "^3.2.13"
   },
   "devDependencies": {
     "@types/jest": "^27.0.1",
