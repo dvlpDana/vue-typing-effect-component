@@ -6,6 +6,7 @@
         ref="typingEffect"
         text="안녕하세요.\n 일시정지와 재개를 지원하는 예제입니다."
         :intervalType="80"
+        :isPaused="isPaused"
       />
     </div>
     <div class="button-group">
@@ -28,25 +29,20 @@ export default {
     TypingEffect,
   },
   setup() {
-    // TypingEffect 컴포넌트 인스턴스 타입을 명시적으로 지정
-    const typingEffect = ref<InstanceType<typeof TypingEffect> | null>(null);
+    const isPaused = ref(false);
 
     const pauseTyping = () => {
-      if (typingEffect.value) {
-        typingEffect.value.pauseTyping();
-      }
+      isPaused.value = true;
     };
 
     const resumeTyping = () => {
-      if (typingEffect.value) {
-        typingEffect.value.resumeTyping();
-      }
+      isPaused.value = false;
     };
 
     return {
+      isPaused,
       pauseTyping,
       resumeTyping,
-      typingEffect,
     };
   },
 };

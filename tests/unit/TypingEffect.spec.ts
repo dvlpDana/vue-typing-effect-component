@@ -34,37 +34,22 @@ describe("TypingEffect.vue", () => {
   it("pauses and resumes typing", async () => {
     const text = "타이핑 효과를 일시정지하고 다시 시작합니다.";
     const wrapper = mount(TypingEffect, {
-      props: { text, intervalType: 50, humanize: 30 },
+      props: { text, intervalType: 50, humanize: 30, isPaused: false },
     });
 
-    // 일시정지하기 전에 잠깐 타이핑
+    // 잠깐 타이핑한 후, 일시정지
     await new Promise((resolve) => setTimeout(resolve, 500));
-    wrapper.vm.pauseTyping();
+    await wrapper.setProps({ isPaused: true });
 
-    // 일시정지 후 1초 기다린 다음 재개
+    // 일시정지 후 1초 기다린 다음, 재개
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    wrapper.vm.resumeTyping();
+    await wrapper.setProps({ isPaused: false });
 
     await waitForTyping(text, 50, 30);
 
+    // 최종적으로 텍스트가 완성되는지 확인
     expect(wrapper.text()).toBe(text);
   });
-
-  it("stops typing when endTyping is called", async () => {
-    const text = "이 텍스트는 중간에 멈춥니다.";
-    const wrapper = mount(TypingEffect, {
-      props: { text, intervalType: 50, humanize: 30 },
-    });
-
-    // 일부 텍스트가 타이핑된 후 종료합니다.
-    setTimeout(() => wrapper.vm.endTyping(), 500);
-
-    await waitForTyping(text, 50, 30);
-
-    expect(wrapper.text()).not.toBe(text);
-    expect(wrapper.text().length).toBeLessThan(text.length);
-  });
-
   it("handles backspace character", async () => {
     const text = "이것은\b\b\b 백스페이스 효과";
     const wrapper = mount(TypingEffect, {

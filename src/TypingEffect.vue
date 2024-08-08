@@ -66,12 +66,15 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    isPaused: {
+      type: Boolean,
+      default: false,
+    },
   },
-  emits: ["typing-start", "typing-end", "typing-pause", "typing-resume"],
+  emits: ["typing-start", "typing-end"],
   setup(props, { emit }) {
     const currentText = ref("");
     const typingInterval = ref<number | undefined>(undefined);
-    const isPaused = ref(false);
     const isTyping = ref(true);
     const currentIndex = ref(0);
 
@@ -96,7 +99,7 @@ export default defineComponent({
       } else {
         clearInterval(typingInterval.value);
         isTyping.value = false;
-        emit("typing-end");
+        emit("typing-end"); // 타이핑 종료 이벤트 emit
         if (props.repeat) {
           currentIndex.value = 0;
           setTimeout(
@@ -119,42 +122,16 @@ export default defineComponent({
         currentIndex.value = 0;
         isTyping.value = true;
 
-        emit("typing-start");
+        emit("typing-start"); // 타이핑 시작 이벤트 emit
 
         const splitText = disassembleHangul(textToType) as HangulChar[];
         const assembledText: HangulChar[] = [];
-        typingInterval.value = setInterval(
-          () => updateText(splitText, assembledText),
-          getRandomInterval(props.intervalType)
-        );
+        typingInterval.value = setInterval(() => {
+          if (!props.isPaused) {
+            updateText(splitText, assembledText);
+          }
+        }, getRandomInterval(props.intervalType));
       }
-    };
-
-    const pauseTyping = () => {
-      clearInterval(typingInterval.value);
-      isPaused.value = true;
-      emit("typing-pause");
-    };
-
-    const resumeTyping = () => {
-      if (isPaused.value) {
-        const splitText = disassembleHangul(props.text || "") as HangulChar[];
-        const assembledText = disassembleHangul(
-          currentText.value
-        ) as HangulChar[];
-        typingInterval.value = setInterval(
-          () => updateText(splitText, assembledText),
-          getRandomInterval(props.intervalType)
-        );
-        isPaused.value = false;
-        emit("typing-resume");
-      }
-    };
-
-    const endTyping = () => {
-      clearInterval(typingInterval.value);
-      isTyping.value = false;
-      emit("typing-end");
     };
 
     const resetTyping = () => {
@@ -162,6 +139,7 @@ export default defineComponent({
         clearInterval(typingInterval.value);
       }
     };
+
     const computedCustomStyle = computed(() => {
       return {
         ...props.customStyle,
@@ -175,10 +153,6 @@ export default defineComponent({
     watch(() => props.text, startTyping);
 
     return {
-      startTyping,
-      pauseTyping,
-      resumeTyping,
-      endTyping,
       computedCustomStyle,
       currentText,
       isTyping,

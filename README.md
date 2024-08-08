@@ -47,8 +47,6 @@ npm install vue-typing-effect-component
 |---|---|
 |typing-start| 타이핑이 시작될 때 발생합니다.|
 |typing-end| 타이핑이 완료될 때 발생합니다.|
-|typing-pause| 타이핑이 일시정지될 때 발생합니다.|
-|typing-resume| 일시정지된 타이핑이 재개될 때 발생합니다.|
 
 이벤트는 다음과 같이 사용할 수 있습니다.
 

@@ -73,6 +73,7 @@ function disassembleHangul(string: string): HangulChar[] {
 
   return result;
 }
+
 function assembleHangul(disassembled: HangulChar[]): string {
   let result = "";
   let cho: Cho | undefined;

@@ -9,7 +9,6 @@
       <RepeatExample />
       <SelectorExample />
       <PauseResumeExample />
-      <EndTypingExample />
       <TypingComputedTimeExample />
     </div>
   </div>
@@ -22,7 +21,6 @@ import IntervalHumanizeExample from "./components/IntervalHumanizeExample.vue";
 import CustomStyleExample from "./components/CustomStyleExample.vue";
 import RepeatExample from "./components/RepeatExample.vue";
 import PauseResumeExample from "./components/PauseResumeExample.vue";
-import EndTypingExample from "./components/EndTypingExample.vue";
 import CusorExample from "./components/CursorExample.vue";
 import SelectorExample from "./components/SelectorExample.vue";
 import TypingComputedTimeExample from "./components/TypingComputedTimeExample.vue";
@@ -34,7 +32,6 @@ export default defineComponent({
     CustomStyleExample,
     RepeatExample,
     PauseResumeExample,
-    EndTypingExample,
     CusorExample,
     SelectorExample,
     TypingComputedTimeExample,
