@@ -1,8 +1,8 @@
 <template>
   <p ref="typingElement" :class="customClass" :style="computedCustomStyle">
     <template v-for="(c, index) in reContents" :key="index">
-      <span>{{ c }}</span
-      ><br v-if="index < reContents.length - 1" />
+      <span>{{ c }}</span>
+      <br v-if="index < reContents.length - 1" />
     </template>
     <span
       v-if="showCursor"
@@ -16,13 +16,14 @@
 
 <script lang="ts">
 import {
-  defineComponent,
   ref,
-  onMounted,
+  defineComponent,
   computed,
+  onMounted,
   watch,
   onUnmounted,
 } from "vue";
+
 import { disassembleHangul, assembleHangul } from "@/hangulHelper";
 import { HangulChar } from "@/HangulTypes";
 
@@ -63,68 +64,16 @@ export default defineComponent({
     },
     cursorAfterTyping: {
       type: Boolean,
-      default: false, // 타이핑 종료 후 커서를 유지할지 여부
+      default: false,
     },
   },
-  setup(props) {
-    const typingElement = ref<HTMLElement | null>(null);
-    let currentText = ref("");
-    let typingInterval: ReturnType<typeof setInterval> | undefined;
-    let isPaused = ref(false);
-    let isTyping = ref(true); // isTyping의 초기값을 true로 설정하여 커서가 처음부터 보이도록 설정
-    let currentIndex = ref(0); // 현재 인덱스를 상태로 관리
-
-    const computedCustomStyle = computed(() => {
-      return {
-        ...props.customStyle,
-      };
-    });
-
-    const reContents = computed(() => {
-      return currentText.value.split("\n");
-    });
-
-    const startTyping = () => {
-      if (typingInterval !== undefined) {
-        clearInterval(typingInterval);
-      }
-      if (typingElement.value) {
-        let textToType: string | null = props.text;
-        if (!textToType && props.selector) {
-          const selectedElement = document.querySelector(props.selector);
-          textToType = selectedElement ? selectedElement.textContent : "";
-        }
-
-        if (textToType) {
-          currentText.value = ""; // 새로 타이핑을 시작할 때 currentText를 초기화
-          currentIndex.value = 0; // 인덱스를 초기화
-          isTyping.value = true; // 타이핑 시작 시 isTyping을 true로 설정
-          typeText(textToType, props.intervalType, typingElement.value);
-        }
-      }
-    };
-
-    const pauseTyping = () => {
-      isPaused.value = true;
-      if (typingInterval !== undefined) {
-        clearInterval(typingInterval);
-      }
-    };
-
-    const resumeTyping = () => {
-      isPaused.value = false;
-      if (typingElement.value && props.text) {
-        typeText(props.text, props.intervalType, typingElement.value, true);
-      }
-    };
-
-    const endTyping = () => {
-      isPaused.value = false;
-      if (typingInterval !== undefined) {
-        clearInterval(typingInterval);
-      }
-      isTyping.value = false; // 타이핑 종료 시 isTyping을 false로 설정
-    };
+  emits: ["typing-start", "typing-end", "typing-pause", "typing-resume"],
+  setup(props, { emit }) {
+    const currentText = ref("");
+    const typingInterval = ref<number | undefined>(undefined);
+    const isPaused = ref(false);
+    const isTyping = ref(true);
+    const currentIndex = ref(0);
 
     const getRandomInterval = (baseInterval: number) => {
       if (typeof props.humanize === "number") {
@@ -136,62 +85,102 @@ export default defineComponent({
       return baseInterval;
     };
 
-    const typeText = (
-      text: string,
-      baseInterval: number,
-      element: HTMLElement,
-      resume = false
+    const updateText = (
+      splitText: HangulChar[],
+      assembledText: HangulChar[]
     ) => {
-      let index = resume ? currentIndex.value : 0;
-      const splitText = disassembleHangul(text) as HangulChar[];
-      let assembledText: HangulChar[] = resume
-        ? (disassembleHangul(currentText.value) as HangulChar[])
-        : [];
-
-      typingInterval = setInterval(() => {
-        if (index < splitText.length) {
-          assembledText.push(splitText[index]);
-          const assembled = assembleHangul(assembledText);
-          currentText.value = assembled;
-          index++;
-          currentIndex.value = index; // 현재 인덱스를 저장
-        } else {
-          clearInterval(typingInterval);
-          isTyping.value = false; // 타이핑이 완료되면 isTyping을 false로 설정
-          if (!props.cursorAfterTyping && !isTyping.value) {
-            typingElement.value?.querySelector(".cursor")?.remove(); // 커서를 완전히 제거
-          }
-          if (props.repeat) {
-            currentIndex.value = 0; // 반복 시 인덱스를 초기화
-            assembledText = [];
-            setTimeout(() => {
-              typeText(text, baseInterval, element, false); // repeat이 true이면 타이핑을 다시 시작
-            }, getRandomInterval(baseInterval));
-          }
+      if (currentIndex.value < splitText.length) {
+        assembledText.push(splitText[currentIndex.value]);
+        currentText.value = assembleHangul(assembledText);
+        currentIndex.value++;
+      } else {
+        clearInterval(typingInterval.value);
+        isTyping.value = false;
+        emit("typing-end");
+        if (props.repeat) {
+          currentIndex.value = 0;
+          setTimeout(
+            () => startTyping(),
+            getRandomInterval(props.intervalType)
+          );
         }
-      }, getRandomInterval(baseInterval));
+      }
     };
 
-    onMounted(() => {
-      startTyping();
-    });
+    const startTyping = () => {
+      clearInterval(typingInterval.value);
+      const textToType =
+        props.text ||
+        (props.selector &&
+          document.querySelector(props.selector)?.textContent) ||
+        "";
+      if (textToType) {
+        currentText.value = "";
+        currentIndex.value = 0;
+        isTyping.value = true;
 
-    onUnmounted(() => {
-      if (typingInterval !== undefined) {
-        clearInterval(typingInterval);
+        emit("typing-start");
+
+        const splitText = disassembleHangul(textToType) as HangulChar[];
+        const assembledText: HangulChar[] = [];
+        typingInterval.value = setInterval(
+          () => updateText(splitText, assembledText),
+          getRandomInterval(props.intervalType)
+        );
       }
+    };
+
+    const pauseTyping = () => {
+      clearInterval(typingInterval.value);
+      isPaused.value = true;
+      emit("typing-pause");
+    };
+
+    const resumeTyping = () => {
+      if (isPaused.value) {
+        const splitText = disassembleHangul(props.text || "") as HangulChar[];
+        const assembledText = disassembleHangul(
+          currentText.value
+        ) as HangulChar[];
+        typingInterval.value = setInterval(
+          () => updateText(splitText, assembledText),
+          getRandomInterval(props.intervalType)
+        );
+        isPaused.value = false;
+        emit("typing-resume");
+      }
+    };
+
+    const endTyping = () => {
+      clearInterval(typingInterval.value);
+      isTyping.value = false;
+      emit("typing-end");
+    };
+
+    const resetTyping = () => {
+      if (typingInterval.value) {
+        clearInterval(typingInterval.value);
+      }
+    };
+    const computedCustomStyle = computed(() => {
+      return {
+        ...props.customStyle,
+      };
     });
 
+    const reContents = computed(() => currentText.value.split("\n"));
+
+    onMounted(startTyping);
+    onUnmounted(resetTyping);
     watch(() => props.text, startTyping);
 
     return {
-      typingElement,
-      computedCustomStyle,
-      currentText,
+      startTyping,
       pauseTyping,
       resumeTyping,
       endTyping,
-      startTyping,
+      computedCustomStyle,
+      currentText,
       isTyping,
       reContents,
     };
