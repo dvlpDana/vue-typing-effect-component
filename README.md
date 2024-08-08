@@ -38,6 +38,81 @@ npm install vue-typing-effect-component
 |customStyle|Object|{}|타이핑 요소에 적용할 사용자 정의 스타일입니다.
 |showCursor|Boolean|false|타이핑 동안 커서를 표시할지 여부를 설정합니다.
 |cursorAfterTyping|Boolean|false|타이핑 종료 후 커서를 유지할지 여부를 설정합니다.
+|repeat|Boolean|false|타이핑 애니메이션을 반복할지 여부를 설정합니다.
+
+## Events
+이 컴포넌트는 타이핑 상태와 관련된 몇 가지 이벤트를 제공합니다. 이 이벤트들은 컴포넌트 외부에서 타이핑 과정에 반응하기 위해 사용할 수 있습니다.
+
+|Events|Description|
+|---|---|
+|typing-start| 타이핑이 시작될 때 발생합니다.|
+|typing-end| 타이핑이 완료될 때 발생합니다.|
+|typing-pause| 타이핑이 일시정지될 때 발생합니다.|
+|typing-resume| 일시정지된 타이핑이 재개될 때 발생합니다.|
+
+이벤트는 다음과 같이 사용할 수 있습니다.
+
+```vue
+<template>
+  <div class="example-container">
+    <h2>Typing Effect with Time Tracking</h2>
+    <div class="typing-box">
+      <TypingEffect
+        text="이 예제는 타이핑 소요 시간을 계산합니다."
+        :showCursor="true"
+        @typing-end="handleTypingEnd"
+        @typing-start="handleTypingStart"
+      />
+    </div>
+    <p class="computed-time" v-if="typingCompleted">
+      타이핑 완료: {{ typingTime }}초 소요되었습니다!
+    </p>
+  </div>
+</template>
+
+<script lang="ts">
+import { ref } from "vue";
+import TypingEffect from "../../src/TypingEffect.vue";
+
+const typingCompleted = ref(false);
+const typingTime = ref(0);
+let startTime = 0;
+
+const handleTypingStart = () => {
+  console.log("타이핑 시작됨"); // 디버깅을 위한 로그 출력
+  startTime = Date.now();
+  typingCompleted.value = false;
+};
+
+const handleTypingEnd = () => {
+  console.log("타이핑 종료됨"); // 디버깅을 위한 로그 출력
+  if (startTime === 0) {
+    console.error("타이핑이 시작되지 않았습니다.");
+    return;
+  }
+
+  const endTime = Date.now();
+  typingTime.value = parseFloat(((endTime - startTime) / 1000).toFixed(2));
+  typingCompleted.value = true;
+  startTime = 0; // reset
+};
+
+export default {
+  components: {
+    TypingEffect,
+  },
+  setup() {
+    return {
+      typingCompleted,
+      typingTime,
+      handleTypingStart,
+      handleTypingEnd,
+    };
+  },
+};
+</script>
+```
+
 
 ## Usage
 
