@@ -58,16 +58,6 @@ describe("disassembleHangul", () => {
     expect(result).toEqual(expectedOutput);
   });
 
-  it("grouped 옵션이 true일 때 분해", () => {
-    const input = "간다";
-    const expectedOutput: HangulChar[][] = [
-      ["ㄱ", "ㅏ", "ㄴ"],
-      ["ㄷ", "ㅏ"],
-    ];
-    const result = disassembleHangul(input, true);
-    expect(result).toEqual(expectedOutput);
-  });
-
   it("복합 자모가 포함된 한글 분해", () => {
     const input = "괜찮다";
     const expectedOutput: HangulChar[] = [

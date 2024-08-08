@@ -76,7 +76,7 @@ describe("TypingEffect.vue", () => {
     expect(wrapper.text()).toBe("백스페이스 효과");
   });
 
-  it("removes cursor after typing ends", async () => {
+  it("hides cursor after typing ends", async () => {
     const text = "커서가 깜빡이다가 타이핑이 종료되면 사라집니다.";
     const wrapper = mount(TypingEffect, {
       props: { text, intervalType: 50, humanize: 30, showCursor: true },
@@ -87,7 +87,9 @@ describe("TypingEffect.vue", () => {
     await nextTick();
 
     const cursorElement = wrapper.find(".cursor");
-    expect(cursorElement.exists()).toBe(false);
+
+    const cursorStyle = window.getComputedStyle(cursorElement.element);
+    expect(cursorStyle.display).toBe("none");
   });
 
   it("handles newline character", async () => {
@@ -119,5 +121,35 @@ describe("TypingEffect.vue", () => {
 
     const cursorElement = wrapper.find(".cursor");
     expect(cursorElement.exists()).toBe(true);
+  });
+
+  it("logs typing start and end events correctly", async () => {
+    const text = "이 예제는 타이핑 이벤트 로그를 확인합니다.";
+    const consoleLogMock = jest.spyOn(console, "log").mockImplementation();
+
+    mount(TypingEffect, {
+      props: {
+        text,
+        intervalType: 50,
+        humanize: 0, // 정확한 이벤트 순서 확인을 위해 humanize를 0으로 설정
+        showCursor: true,
+        onTypingStart: () => {
+          console.log("타이핑 시작");
+        },
+        onTypingEnd: () => {
+          console.log("타이핑 종료");
+        },
+      },
+    });
+
+    await waitForTyping(text, 50, 0);
+
+    await nextTick();
+
+    // 콘솔에 찍힌 로그 순서를 확인합니다.
+    expect(consoleLogMock).toHaveBeenNthCalledWith(1, "타이핑 시작");
+    expect(consoleLogMock).toHaveBeenNthCalledWith(2, "타이핑 종료");
+
+    consoleLogMock.mockRestore(); // 모킹된 콘솔 로그를 원래 상태로 되돌립니다.
   });
 });
